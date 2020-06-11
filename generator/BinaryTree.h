@@ -1,13 +1,8 @@
 #ifndef MAZE_BINARYTREE_H
 #define MAZE_BINARYTREE_H
 
+#include "../random.h"
 #include "../Maze.h"
-
-#define HALF_RAND_MAX (RAND_MAX /2)
-
-bool coin_flip() {
-    return rand() <= HALF_RAND_MAX;
-}
 
 void generate_binary_tree_maze(Maze *maze) {
     if (maze == NULL) {
