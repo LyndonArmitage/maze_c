@@ -3,4 +3,4 @@ project(maze C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(maze main.c Maze.h)
+add_executable(maze main.c Maze.h generator/BinaryTree.h)

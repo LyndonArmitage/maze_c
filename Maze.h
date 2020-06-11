@@ -115,6 +115,30 @@ void set_all_neighbouring_cells(Maze *maze, Cell *cell) {
     cell->neighbours[WEST] = west;
 }
 
+void unlink_all_cells(Maze *maze) {
+    int width = maze->width;
+    int height = maze->height;
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            Cell *cell = maze->cells[(y * width) + x];
+            for (int i = 0; i < cell->neighbour_count; i++) {
+                cell->neighbours[i] = NULL;
+            }
+        }
+    }
+}
+
+void link_all_adjacent_cells(Maze *maze) {
+    int width = maze->width;
+    int height = maze->height;
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            Cell *cell = maze->cells[(y * width) + x];
+            set_all_neighbouring_cells(maze, cell);
+        }
+    }
+}
+
 Maze *new_maze(int width, int height, bool all_linked) {
     Maze *maze = malloc(sizeof(Maze));
 
@@ -130,12 +154,7 @@ Maze *new_maze(int width, int height, bool all_linked) {
     }
 
     if (all_linked) {
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                Cell *cell = maze->cells[(y * width) + x];
-                set_all_neighbouring_cells(maze, cell);
-            }
-        }
+        link_all_adjacent_cells(maze);
     }
 
     return maze;
@@ -295,10 +314,10 @@ void link_adjacent_cells(Cell *cell1, Cell *cell2) {
 
 typedef struct {
     bool north, east, south, west;
-} ValidDirections;
+} Directions;
 
-ValidDirections get_directions(Cell *cell) {
-    ValidDirections dirs;
+Directions get_unblocked_directions(Cell *cell) {
+    Directions dirs;
     if (cell == NULL) {
         dirs.north = false;
         dirs.east = false;
@@ -310,6 +329,15 @@ ValidDirections get_directions(Cell *cell) {
         dirs.south = cell->neighbours[SOUTH];
         dirs.west = cell->neighbours[WEST];
     }
+    return dirs;
+}
+
+Directions get_blocked_directions(Cell* cell) {
+    Directions dirs = get_unblocked_directions(cell);
+    dirs.north = !dirs.north;
+    dirs.east = !dirs.east;
+    dirs.south = !dirs.south;
+    dirs.west = !dirs.west;
     return dirs;
 }
 
@@ -328,7 +356,7 @@ void print_maze(Maze *maze) {
                 printf("#");
                 continue;
             }
-            ValidDirections dirs = get_directions(cell);
+            Directions dirs = get_unblocked_directions(cell);
             if (dirs.north && dirs.east && dirs.south && dirs.west) {
                 printf("╬");
             } else if (dirs.north && dirs.east && dirs.south) {
