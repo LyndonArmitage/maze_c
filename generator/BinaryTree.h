@@ -1,7 +1,7 @@
 #ifndef MAZE_BINARYTREE_H
 #define MAZE_BINARYTREE_H
 
-#include "../random.h"
+#include "../utils.h"
 #include "../Maze.h"
 
 void generate_binary_tree_maze(Maze *maze) {
