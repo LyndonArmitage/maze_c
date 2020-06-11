@@ -22,20 +22,26 @@ void generate_binary_tree_maze(Maze *maze) {
             Cell *cell = cell_at(maze, x, y);
             Directions dirs = get_blocked_directions(cell);
             int link_dir;
-            if (dirs.north && dirs.east) {
-                bool should_east = coin_flip();
-                if (should_east) {
-                    link_dir = EAST;
-                } else {
-                    link_dir = NORTH;
-                }
+            if (x == width - 1) {
+                link_dir = NORTH;
+            } else if (y == 0) {
+                link_dir = EAST;
             } else {
-                if (dirs.north) {
-                    link_dir = NORTH;
-                } else if (dirs.east) {
-                    link_dir = EAST;
+                if (dirs.north && dirs.east) {
+                    bool should_east = coin_flip();
+                    if (should_east) {
+                        link_dir = EAST;
+                    } else {
+                        link_dir = NORTH;
+                    }
                 } else {
-                    link_dir = -1;
+                    if (dirs.north) {
+                        link_dir = NORTH;
+                    } else if (dirs.east) {
+                        link_dir = EAST;
+                    } else {
+                        link_dir = -1;
+                    }
                 }
             }
             if (link_dir != -1) {
