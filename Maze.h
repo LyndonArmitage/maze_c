@@ -71,6 +71,11 @@ void delete_cell(Cell *cell, bool remove_from_neighbours) {
     free(cell);
 }
 
+/**
+ * Maze data type.
+ *
+ * Holds the width and height as well as Cell entries.
+ */
 typedef struct {
     int width;
     int height;
@@ -97,23 +102,51 @@ Cell *cell_at(Maze *maze, int x, int y) {
 }
 
 /**
+ * Gets the cell adjacent to the given cell in the given direction.
+ *
+ * Returns NULL if there is no cell in that direction
+ * @param maze The maze
+ * @param cell The current cell
+ * @param direction The direction to look in
+ * @return NULL if there is no cell, otherwise the cell in that direction
+ */
+Cell *get_cell_adjacent(Maze *maze, Cell *cell, int direction) {
+    if (direction < NORTH || direction > WEST || maze == NULL || cell == NULL) {
+        return NULL;
+    }
+    int x = cell->x, y = cell->y;
+    switch (direction) {
+        case NORTH:
+            return cell_at(maze, x, y - 1);
+        case EAST:
+            return cell_at(maze, x + 1, y);
+        case SOUTH:
+            return cell_at(maze, x, y + 1);
+        case WEST:
+            return cell_at(maze, x - 1, y);
+        default:
+            return NULL;
+    }
+}
+
+
+/**
  * Sets all the neighbour values in a cell to those surrounding it in the maze
  * @param maze The maze
  * @param cell The cell to work on
  */
 void set_all_neighbouring_cells(Maze *maze, Cell *cell) {
-    int x = cell->x, y = cell->y;
-
-    Cell *north = cell_at(maze, x, y - 1);
-    Cell *east = cell_at(maze, x + 1, y);
-    Cell *south = cell_at(maze, x, y + 1);
-    Cell *west = cell_at(maze, x - 1, y);
+    Cell *north = get_cell_adjacent(maze, cell, NORTH);
+    Cell *east = get_cell_adjacent(maze, cell, EAST);
+    Cell *south = get_cell_adjacent(maze, cell, SOUTH);
+    Cell *west = get_cell_adjacent(maze, cell, WEST);
 
     cell->neighbours[NORTH] = north;
     cell->neighbours[EAST] = east;
     cell->neighbours[SOUTH] = south;
     cell->neighbours[WEST] = west;
 }
+
 
 void unlink_all_cells(Maze *maze) {
     int width = maze->width;
@@ -225,20 +258,7 @@ void link_cell_in_dir(Maze *maze, Cell *cell, int dir) {
     if (maze == NULL || cell == NULL || dir < NORTH || dir > WEST) {
         return;
     }
-    Cell *neighbour = NULL;
-    if (dir == NORTH) {
-        neighbour = cell_at(maze, cell->x, cell->y - 1);
-    }
-    if (dir == EAST) {
-        neighbour = cell_at(maze, cell->x + 1, cell->y);
-    }
-    if (dir == SOUTH) {
-        neighbour = cell_at(maze, cell->x, cell->y + 1);
-    }
-    if (dir == WEST) {
-        neighbour = cell_at(maze, cell->x - 1, cell->y);
-    }
-
+    Cell *neighbour = get_cell_adjacent(maze, cell, dir);
     if (neighbour != NULL) {
         cell->neighbours[dir] = neighbour;
         int my_pos;
@@ -332,7 +352,7 @@ Directions get_unblocked_directions(Cell *cell) {
     return dirs;
 }
 
-Directions get_blocked_directions(Cell* cell) {
+Directions get_blocked_directions(Cell *cell) {
     Directions dirs = get_unblocked_directions(cell);
     dirs.north = !dirs.north;
     dirs.east = !dirs.east;

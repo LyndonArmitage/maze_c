@@ -11,6 +11,10 @@ bool coin_flip() {
     return rand() <= HALF_RAND_MAX;
 }
 
+int random_direction() {
+    return rand() % (WEST+1);
+}
+
 typedef struct CellListEntry {
     Cell *cell;
     struct CellListEntry *previous;
