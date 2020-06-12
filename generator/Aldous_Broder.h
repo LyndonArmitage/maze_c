@@ -19,16 +19,14 @@ void generate_aldous_broder_maze(Maze *maze) {
         }
     }
 
-    int start_x = rand() % width;
-    int start_y = rand() % height;
-    Cell *current = cell_at(maze, start_x, start_y);
+    Cell *current = random_cell(maze);
     if (current == NULL) {
-        fprintf(stderr, "Unable to start at cell: %d,%d", start_x, start_y);
+        fprintf(stderr, "Unable to start at random cell");
         exit(EXIT_FAILURE);
     }
 
     int visited_count = 1;
-    visited[start_y][start_x] = current;
+    visited[current->y][current->x] = current;
 
     int all_cells_count = width * height;
     while (visited_count < all_cells_count) {
