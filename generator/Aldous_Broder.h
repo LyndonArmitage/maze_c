@@ -28,7 +28,7 @@ void generate_aldous_broder_maze(Maze *maze) {
     int visited_count = 1;
     visited[current->y][current->x] = current;
 
-    int all_cells_count = width * height;
+    int all_cells_count = maze->cell_count;
     while (visited_count < all_cells_count) {
         Cell *adjacent = NULL;
         int dir;

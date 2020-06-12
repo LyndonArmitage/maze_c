@@ -9,9 +9,8 @@
 
 int main() {
     srand(time(NULL));
-    Maze *maze = new_maze(19, 10, false);
-
-    render_maze_with_refresh(maze, 50, generate_hunt_and_kill_maze);
+    Maze *maze = new_maze(50, 50, false);
+    render_maze_with_refresh(maze, 10, generate_hunt_and_kill_maze);
     delete_maze(maze);
     return 0;
 }

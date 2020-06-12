@@ -86,6 +86,7 @@ typedef struct {
     int width;
     int height;
     Cell **cells;
+    int cell_count;
 } Maze;
 
 /**
@@ -153,7 +154,7 @@ void set_all_neighbouring_cells(Maze *maze, Cell *cell) {
     cell->neighbours[WEST] = west;
 }
 
-void get_all_neighbouring_cells(Maze *maze, Cell *cell, Cell ** array) {
+void get_all_neighbouring_cells(Maze *maze, Cell *cell, Cell **array) {
     if (maze == NULL || cell == NULL) return;
     array[NORTH] = get_cell_adjacent(maze, cell, NORTH);
     array[EAST] = get_cell_adjacent(maze, cell, EAST);
@@ -168,6 +169,7 @@ void unlink_all_cells(Maze *maze) {
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             Cell *cell = maze->cells[(y * width) + x];
+            if (cell == NULL) continue;
             for (int i = 0; i < cell->neighbour_count; i++) {
                 cell->neighbours[i] = NULL;
             }
@@ -192,6 +194,7 @@ Maze *new_maze(int width, int height, bool all_linked) {
     maze->width = width;
     maze->height = height;
     maze->cells = malloc(sizeof(Cell *) * width * height);
+    maze->cell_count = width * height;
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
@@ -217,11 +220,13 @@ Maze *new_maze(int width, int height, bool all_linked) {
  * @param y The y location of the cell
  */
 void remove_cell(Maze *maze, int x, int y) {
+    if (maze == NULL) return;
     int width = maze->width;
-    Cell *cell = maze->cells[(y * width) + x];
+    Cell *cell = cell_at(maze, x, y);
     if (cell != NULL) {
         delete_cell(cell, true);
         maze->cells[(y * width) + x] = NULL;
+        maze->cell_count --;
     }
 }
 
@@ -235,6 +240,7 @@ void delete_maze(Maze *maze) {
             delete_cell(cell, false);
         }
     }
+    maze->cell_count = 0;
     free(maze->cells);
     free(maze);
 }

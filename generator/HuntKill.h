@@ -11,7 +11,7 @@ void generate_hunt_and_kill_maze(Maze *maze) {
     }
     int width = maze->width;
     int height = maze->height;
-    int total_cells = width * height;
+    int total_cells = maze->cell_count;
     unlink_all_cells(maze);
 
     Cell *visited[height][width];
