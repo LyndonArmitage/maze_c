@@ -12,7 +12,93 @@ bool coin_flip() {
 }
 
 int random_direction() {
-    return rand() % (WEST + 1);
+    return rand() % DIRECTION_COUNT;
+}
+
+Cell *random_linked_cell(Cell *cell) {
+    if (cell == NULL || cell->neighbour_count <= 0) return NULL;
+    int neighbour_count = cell->neighbour_count;
+
+    // Check to ensure there are valid neighbours
+    int null_count = 0;
+    for (int i = 0; i < neighbour_count; i++) {
+        if (cell->neighbours[i] == NULL) null_count++;
+        else break;
+    }
+    if (null_count >= neighbour_count) return NULL;
+
+    int pos;
+    Cell *linked = NULL;
+    while (linked == NULL) {
+        pos = rand() % neighbour_count;
+        linked = cell->neighbours[pos];
+    }
+    return linked;
+}
+
+Cell *random_unlinked_cell(Maze *maze, Cell *cell) {
+    if (cell == NULL) return NULL;
+
+    // create an array of all the possible neighbours
+    Cell *possible[DIRECTION_COUNT] = {
+            get_cell_adjacent(maze, cell, NORTH),
+            get_cell_adjacent(maze, cell, EAST),
+            get_cell_adjacent(maze, cell, SOUTH),
+            get_cell_adjacent(maze, cell, WEST)
+    };
+
+    // Ensure this cell has neighbours
+    int null_count = 0;
+    for (int i = 0; i < DIRECTION_COUNT; i++) {
+        Cell *other = possible[i];
+        if (other == NULL) {
+            null_count++;
+        } else {
+            // NULL out any connected
+            int dir = neighbour_pos(cell, other);
+            if (dir != -1 && cell->neighbours[dir] == other) {
+                possible[i] = NULL;
+                null_count++;
+            }
+        }
+    }
+    if (null_count >= DIRECTION_COUNT) return NULL;
+
+    Cell *unlinked = NULL;
+    while (unlinked == NULL) {
+        int dir = rand() % DIRECTION_COUNT;
+        unlinked = possible[dir];
+    }
+
+    return unlinked;
+}
+
+Cell *random_neighbour_cell(Maze *maze, Cell *cell) {
+    if (maze == NULL || cell == NULL) return NULL;
+
+    // create an array of all the possible neighbours
+    Cell *possible[DIRECTION_COUNT] = {
+            get_cell_adjacent(maze, cell, NORTH),
+            get_cell_adjacent(maze, cell, EAST),
+            get_cell_adjacent(maze, cell, SOUTH),
+            get_cell_adjacent(maze, cell, WEST)
+    };
+
+    // Ensure this cell has neighbours
+    int null_count = 0;
+    for (int i = 0; i < DIRECTION_COUNT; i++) {
+        if (possible[i] == NULL) null_count++;
+        else break;
+    }
+    if (null_count >= DIRECTION_COUNT) return NULL;
+
+    int dir;
+    Cell *neighbour = NULL;
+    while (neighbour == NULL) {
+        dir = rand() % DIRECTION_COUNT;
+        neighbour = possible[dir];
+    }
+    return neighbour;
 }
 
 Cell *random_cell(Maze *maze) {

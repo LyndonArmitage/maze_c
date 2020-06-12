@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define DIRECTION_COUNT 4
+
 enum Direction {
     NORTH = 0,
     EAST = 1,
@@ -17,15 +19,19 @@ typedef struct Cell {
     int x, y;
     unsigned int neighbour_count;
     struct Cell **neighbours;
+    int rgb[3];
 } Cell;
 
 Cell *new_cell(int x, int y) {
     Cell *cell = malloc(sizeof(Cell));
     cell->x = x;
     cell->y = y;
+    cell->rgb[0] = 0;
+    cell->rgb[1] = 0;
+    cell->rgb[2] = 0;
 
     // fixed count of potential neighbours in cardinal directions only
-    cell->neighbour_count = 4;
+    cell->neighbour_count = DIRECTION_COUNT;
     cell->neighbours = malloc(sizeof(Cell *) * cell->neighbour_count);
     for (int i = 0; i < cell->neighbour_count; i++) {
         cell->neighbours[i] = NULL;
@@ -45,7 +51,7 @@ Cell *new_cell(int x, int y) {
  */
 int neighbour_pos(Cell *cell_to_search, Cell *cell_to_find) {
     if (cell_to_search == NULL || cell_to_find == NULL) {
-        return false;
+        return -1;
     }
     for (int i = 0; i < cell_to_search->neighbour_count; i++) {
         Cell *n = cell_to_search->neighbours[i];
@@ -145,6 +151,14 @@ void set_all_neighbouring_cells(Maze *maze, Cell *cell) {
     cell->neighbours[EAST] = east;
     cell->neighbours[SOUTH] = south;
     cell->neighbours[WEST] = west;
+}
+
+void get_all_neighbouring_cells(Maze *maze, Cell *cell, Cell ** array) {
+    if (maze == NULL || cell == NULL) return;
+    array[NORTH] = get_cell_adjacent(maze, cell, NORTH);
+    array[EAST] = get_cell_adjacent(maze, cell, EAST);
+    array[SOUTH] = get_cell_adjacent(maze, cell, SOUTH);
+    array[WEST] = get_cell_adjacent(maze, cell, WEST);
 }
 
 
