@@ -11,11 +11,7 @@ int main() {
     srand(time(NULL));
     Maze *maze = new_maze(19, 10, false);
 
-    //generate_binary_tree_maze(maze);
-    //generate_sidewinder_maze(maze);
-    //generate_aldous_broder_maze(maze);
-    generate_hunt_and_kill_maze(maze);
-    render_maze(maze, 50);
+    render_maze_with_refresh(maze, 50, generate_hunt_and_kill_maze);
     delete_maze(maze);
     return 0;
 }

@@ -6,8 +6,15 @@
 
 void render_maze_to_sdl(SDL_Renderer *renderer, Maze *maze, int cell_size);
 
-
-int render_maze(Maze *maze, int cell_size) {
+int render_maze_with_refresh(
+        Maze *maze,
+        int cell_size,
+        void (*maze_generator)(Maze *)
+) {
+    if (maze == NULL || cell_size < 1 || maze_generator == NULL) {
+        fprintf(stderr, "Invalid arguments for rendering");
+        return 1;
+    }
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         fprintf(stderr, "Failed to init video: %s\n", SDL_GetError());
@@ -37,6 +44,8 @@ int render_maze(Maze *maze, int cell_size) {
         return 1;
     }
 
+    maze_generator(maze);
+
     bool done = false;
     while (!done) {
         render_maze_to_sdl(renderer, maze, cell_size);
@@ -44,9 +53,12 @@ int render_maze(Maze *maze, int cell_size) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 done = true;
-            } else if (event.type == SDL_KEYDOWN) {
-                if (event.key.keysym.sym == SDLK_ESCAPE) {
+            } else if (event.type == SDL_KEYUP) {
+                SDL_KeyCode code = event.key.keysym.sym;
+                if (code == SDLK_ESCAPE) {
                     done = true;
+                } else {
+                    maze_generator(maze);
                 }
             }
         }
