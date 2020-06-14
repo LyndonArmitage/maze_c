@@ -46,20 +46,19 @@ int render_maze_with_refresh(
 
     maze_generator(maze);
 
+    render_maze_to_sdl(renderer, maze, cell_size);
     bool done = false;
-    while (!done) {
-        render_maze_to_sdl(renderer, maze, cell_size);
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
+    SDL_Event event;
+    while (!done && SDL_WaitEvent(&event)) {
+        if (event.type == SDL_QUIT) {
+            done = true;
+        } else if (event.type == SDL_KEYUP) {
+            SDL_KeyCode code = event.key.keysym.sym;
+            if (code == SDLK_ESCAPE) {
                 done = true;
-            } else if (event.type == SDL_KEYUP) {
-                SDL_KeyCode code = event.key.keysym.sym;
-                if (code == SDLK_ESCAPE) {
-                    done = true;
-                } else {
-                    maze_generator(maze);
-                }
+            } else {
+                maze_generator(maze);
+                render_maze_to_sdl(renderer, maze, cell_size);
             }
         }
     }
