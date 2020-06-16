@@ -4,12 +4,12 @@
 #include <SDL2/SDL.h>
 #include "Maze.h"
 
-void render_maze_to_sdl(SDL_Renderer *renderer, Maze *maze, int cell_size);
+void render_maze_to_sdl(SDL_Renderer *renderer, const Maze *maze, int cell_size);
 
 int render_maze_with_refresh(
-        Maze *maze,
+        const Maze *maze,
         int cell_size,
-        void (*maze_generator)(Maze *)
+        void (*maze_generator)(const Maze *)
 ) {
     if (maze == NULL || cell_size < 1 || maze_generator == NULL) {
         fprintf(stderr, "Invalid arguments for rendering");
@@ -21,8 +21,8 @@ int render_maze_with_refresh(
         return 1;
     }
 
-    int window_width = maze->width * cell_size;
-    int window_height = maze->height * cell_size;
+    const int window_width = maze->width * cell_size;
+    const int window_height = maze->height * cell_size;
 
     SDL_Window *window = SDL_CreateWindow(
             "Maze",
@@ -69,13 +69,13 @@ int render_maze_with_refresh(
     return 0;
 }
 
-void render_maze_to_sdl(SDL_Renderer *renderer, Maze *maze, int cell_size) {
+void render_maze_to_sdl(SDL_Renderer *renderer, const Maze *maze, int cell_size) {
     if (renderer == NULL || maze == NULL) {
         return;
     }
 
-    int width = maze->width;
-    int height = maze->height;
+    const int width = maze->width;
+    const int height = maze->height;
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);

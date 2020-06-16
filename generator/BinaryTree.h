@@ -4,12 +4,12 @@
 #include "../utils.h"
 #include "../Maze.h"
 
-void generate_binary_tree_maze(Maze *maze) {
+void generate_binary_tree_maze(const Maze *maze) {
     if (maze == NULL) {
         fprintf(stderr, "No maze given to generator");
         exit(EXIT_FAILURE);
     }
-    int width = maze->width, height = maze->height;
+    const int width = maze->width, height = maze->height;
     unlink_all_cells(maze);
 
     for (int y = height - 1; y >= 0; y--) {

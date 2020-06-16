@@ -3,7 +3,7 @@
 #include "../Maze.h"
 #include "../utils.h"
 
-void generate_sidewinder_maze(Maze *maze) {
+void generate_sidewinder_maze(const Maze *maze) {
     if (maze == NULL) {
         fprintf(stderr, "No maze given to generator");
         exit(EXIT_FAILURE);

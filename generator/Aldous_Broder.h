@@ -4,12 +4,12 @@
 #include "../Maze.h"
 #include "../utils.h"
 
-void generate_aldous_broder_maze(Maze *maze) {
+void generate_aldous_broder_maze(const Maze *maze) {
     if (maze == NULL) {
         fprintf(stderr, "No maze given to generator");
         exit(EXIT_FAILURE);
     }
-    int width = maze->width, height = maze->height;
+    const int width = maze->width, height = maze->height;
     unlink_all_cells(maze);
 
     Cell *visited[height][width];

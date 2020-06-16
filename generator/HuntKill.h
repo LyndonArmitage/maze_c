@@ -4,14 +4,14 @@
 #include "../Maze.h"
 #include "../utils.h"
 
-void generate_hunt_and_kill_maze(Maze *maze) {
+void generate_hunt_and_kill_maze(const Maze *maze) {
     if (maze == NULL) {
         fprintf(stderr, "No maze given to generator");
         exit(EXIT_FAILURE);
     }
-    int width = maze->width;
-    int height = maze->height;
-    int total_cells = maze->cell_count;
+    const int width = maze->width;
+    const int height = maze->height;
+    const int total_cells = maze->cell_count;
     unlink_all_cells(maze);
 
     Cell *visited[height][width];
@@ -29,10 +29,10 @@ void generate_hunt_and_kill_maze(Maze *maze) {
         if (current == NULL) break;
 
         // Get next cell that is not visited and not linked to
-        Cell* possible_next[DIRECTION_COUNT];
-        get_all_neighbouring_cells(maze, current, possible_next);
+        int neighbour_count = 0;
+        Cell** possible_next = get_all_neighbouring_cells(maze, current, &neighbour_count);
         int possible_next_null_count = 0;
-        for (int i = 0; i < DIRECTION_COUNT; i ++) {
+        for (int i = 0; i < neighbour_count; i ++) {
             Cell* possible = possible_next[i];
             if (possible == NULL ||current->neighbours[i] == possible || visited[possible->y][possible->x] == possible) {
                 possible_next[i] = NULL;
@@ -40,12 +40,13 @@ void generate_hunt_and_kill_maze(Maze *maze) {
             }
         }
         Cell *next = NULL;
-        if (possible_next_null_count < DIRECTION_COUNT) {
+        if (possible_next_null_count < neighbour_count) {
             while(next == NULL) {
-                next = possible_next[rand() % DIRECTION_COUNT];
+                next = possible_next[rand() % neighbour_count];
             }
         }
 
+        free(possible_next);
         bool hunt_time = next == NULL;
         if (!hunt_time) {
             // random walk
@@ -67,22 +68,25 @@ void generate_hunt_and_kill_maze(Maze *maze) {
                     if (this_cell == NULL) {
                         this_cell = cell_at(maze, x, y);
                         if (this_cell == NULL) continue;
-                        Cell *cells[DIRECTION_COUNT];
-                        get_all_neighbouring_cells(maze, this_cell, cells);
+                        int cells_count = 0;
+                        Cell **cells = get_all_neighbouring_cells(maze, this_cell, &cells_count);
                         int null_count = 0;
-                        for (int i = 0; i < DIRECTION_COUNT; i++) {
+                        for (int i = 0; i < cells_count; i++) {
                             Cell *neighbour = cells[i];
                             if (neighbour == NULL || visited[neighbour->y][neighbour->x] == NULL) {
                                 null_count++;
                                 cells[i] = NULL;
                             }
                         }
-                        if (null_count >= DIRECTION_COUNT) continue; // all neighbours are unvisited
+                        if (null_count >= cells_count) {
+                            free(cells);
+                            continue; // all neighbours are unvisited
+                        }
 
                         // find visited neighbour
                         Cell *visited_neighbour = NULL;
                         while (visited_neighbour == NULL) {
-                            int i = rand() % DIRECTION_COUNT;
+                            int i = rand() % cells_count;
                             visited_neighbour = cells[i];
                         }
                         link_adjacent_cells(this_cell, visited_neighbour);
@@ -90,6 +94,7 @@ void generate_hunt_and_kill_maze(Maze *maze) {
                         visited_count++;
                         current = this_cell;
                         finished = true;
+                        free(cells);
                         break;
                     }
                 }

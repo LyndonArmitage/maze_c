@@ -49,7 +49,7 @@ Cell *new_cell(int x, int y) {
  * @return -1 if not found otherwise index of cell_to_find in cell_to_search's
  * neighbours array.
  */
-int neighbour_pos(Cell *cell_to_search, Cell *cell_to_find) {
+int neighbour_pos(const Cell *cell_to_search, const Cell *cell_to_find) {
     if (cell_to_search == NULL || cell_to_find == NULL) {
         return -1;
     }
@@ -96,12 +96,12 @@ typedef struct {
  * @param y The y location of the cell
  * @return A pointer to the cell at (x,y) or NULL if there is no entry there
  */
-Cell *cell_at(Maze *maze, int x, int y) {
+Cell *cell_at(const Maze *maze, int x, int y) {
     if (maze == NULL) {
         return NULL;
     }
-    int width = maze->width;
-    int height = maze->height;
+    const int width = maze->width;
+    const int height = maze->height;
     if (x >= width || y >= height || x < 0 || y < 0) {
         return NULL;
     }
@@ -117,11 +117,11 @@ Cell *cell_at(Maze *maze, int x, int y) {
  * @param direction The direction to look in
  * @return NULL if there is no cell, otherwise the cell in that direction
  */
-Cell *get_cell_adjacent(Maze *maze, Cell *cell, int direction) {
+Cell *get_cell_adjacent(const Maze *maze, const Cell *cell, int direction) {
     if (direction < NORTH || direction > WEST || maze == NULL || cell == NULL) {
         return NULL;
     }
-    int x = cell->x, y = cell->y;
+    const int x = cell->x, y = cell->y;
     switch (direction) {
         case NORTH:
             return cell_at(maze, x, y - 1);
@@ -142,7 +142,7 @@ Cell *get_cell_adjacent(Maze *maze, Cell *cell, int direction) {
  * @param maze The maze
  * @param cell The cell to work on
  */
-void set_all_neighbouring_cells(Maze *maze, Cell *cell) {
+void set_all_neighbouring_cells(const Maze *maze, const Cell *cell) {
     Cell *north = get_cell_adjacent(maze, cell, NORTH);
     Cell *east = get_cell_adjacent(maze, cell, EAST);
     Cell *south = get_cell_adjacent(maze, cell, SOUTH);
@@ -154,18 +154,36 @@ void set_all_neighbouring_cells(Maze *maze, Cell *cell) {
     cell->neighbours[WEST] = west;
 }
 
-void get_all_neighbouring_cells(Maze *maze, Cell *cell, Cell **array) {
-    if (maze == NULL || cell == NULL) return;
+/**
+ * Get all neighbouring cells to a given cell
+ * @param maze The maze
+ * @param cell The cell to get neighbours of
+ * @param size A pointer to an integer that will be filled with the size of the
+ * returned array
+ * @return A pointer to an array of pointers to the neighbouring cells
+ */
+Cell **get_all_neighbouring_cells(
+        const Maze *maze,
+        const Cell *cell,
+        int *size
+) {
+    if (maze == NULL || cell == NULL) {
+        *size = 0;
+        return NULL;
+    }
+    Cell **array = malloc(sizeof(Cell *) * DIRECTION_COUNT);
     array[NORTH] = get_cell_adjacent(maze, cell, NORTH);
     array[EAST] = get_cell_adjacent(maze, cell, EAST);
     array[SOUTH] = get_cell_adjacent(maze, cell, SOUTH);
     array[WEST] = get_cell_adjacent(maze, cell, WEST);
+    *size = DIRECTION_COUNT;
+    return array;
 }
 
 
-void unlink_all_cells(Maze *maze) {
-    int width = maze->width;
-    int height = maze->height;
+void unlink_all_cells(const Maze *maze) {
+    const int width = maze->width;
+    const int height = maze->height;
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             Cell *cell = maze->cells[(y * width) + x];
@@ -177,9 +195,9 @@ void unlink_all_cells(Maze *maze) {
     }
 }
 
-void link_all_adjacent_cells(Maze *maze) {
-    int width = maze->width;
-    int height = maze->height;
+void link_all_adjacent_cells(const Maze *maze) {
+    const int width = maze->width;
+    const int height = maze->height;
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             Cell *cell = maze->cells[(y * width) + x];
@@ -226,7 +244,7 @@ void remove_cell(Maze *maze, int x, int y) {
     if (cell != NULL) {
         delete_cell(cell, true);
         maze->cells[(y * width) + x] = NULL;
-        maze->cell_count --;
+        maze->cell_count--;
     }
 }
 
@@ -245,7 +263,7 @@ void delete_maze(Maze *maze) {
     free(maze);
 }
 
-void unlink_cells(Cell *cell1, Cell *cell2) {
+void unlink_cells(const Cell *cell1, const Cell *cell2) {
     if (cell1 == NULL || cell2 == NULL) {
         return;
     }
@@ -260,7 +278,7 @@ void unlink_cells(Cell *cell1, Cell *cell2) {
     }
 }
 
-void unlink_cell_in_dir(Cell *cell, int dir) {
+void unlink_cell_in_dir(const Cell *cell, int dir) {
     if (cell == NULL || dir < NORTH || dir > WEST) {
         return;
     }
@@ -274,7 +292,7 @@ void unlink_cell_in_dir(Cell *cell, int dir) {
     }
 }
 
-void link_cell_in_dir(Maze *maze, Cell *cell, int dir) {
+void link_cell_in_dir(const Maze *maze, const Cell *cell, int dir) {
     if (maze == NULL || cell == NULL || dir < NORTH || dir > WEST) {
         return;
     }
@@ -299,7 +317,7 @@ void link_cell_in_dir(Maze *maze, Cell *cell, int dir) {
                 my_pos = -1;
         }
         if (my_pos != -1) {
-            neighbour->neighbours[my_pos] = cell;
+            neighbour->neighbours[my_pos] = (Cell *) cell;
         }
     }
 }
@@ -311,7 +329,7 @@ void link_cell_in_dir(Maze *maze, Cell *cell, int dir) {
  * @param cell1 First cell
  * @param cell2 Second cell
  */
-void link_adjacent_cells(Cell *cell1, Cell *cell2) {
+void link_adjacent_cells(const Cell *cell1, const Cell *cell2) {
     if (cell1 == NULL || cell2 == NULL || cell1 == cell2) {
         return;
     }
@@ -348,15 +366,15 @@ void link_adjacent_cells(Cell *cell1, Cell *cell2) {
         return;
     }
 
-    cell1->neighbours[cell1_dir] = cell2;
-    cell2->neighbours[cell2_dir] = cell1;
+    cell1->neighbours[cell1_dir] = (Cell *) cell2;
+    cell2->neighbours[cell2_dir] = (Cell *) cell1;
 }
 
 typedef struct {
     bool north, east, south, west;
 } Directions;
 
-Directions get_unblocked_directions(Cell *cell) {
+Directions get_unblocked_directions(const Cell *cell) {
     Directions dirs;
     if (cell == NULL) {
         dirs.north = false;
@@ -372,7 +390,7 @@ Directions get_unblocked_directions(Cell *cell) {
     return dirs;
 }
 
-Directions get_blocked_directions(Cell *cell) {
+Directions get_blocked_directions(const Cell *cell) {
     Directions dirs = get_unblocked_directions(cell);
     dirs.north = !dirs.north;
     dirs.east = !dirs.east;
@@ -381,13 +399,13 @@ Directions get_blocked_directions(Cell *cell) {
     return dirs;
 }
 
-void print_maze(Maze *maze) {
+void print_maze(const Maze *maze) {
     if (maze == NULL) {
         fprintf(stderr, "No maze to print");
         return;
     }
-    unsigned int width = maze->width;
-    unsigned int height = maze->height;
+    const int width = maze->width;
+    const int height = maze->height;
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
