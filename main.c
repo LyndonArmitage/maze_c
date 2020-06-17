@@ -10,25 +10,24 @@
 
 int main(int argc, char **args) {
 
-    int width;
-    if (argc >= 2) {
-        width = (int) strtol(args[1], NULL, 10);
-    } else {
-        width = 50;
-    }
-    int height;
-    if (argc >= 3) {
-        height = (int) strtol(args[2], NULL, 10);
-    } else {
-        height = 50;
+    if (argc < 3) {
+        fprintf(stderr, "Missing width and height arguments\n");
+        fprintf(stderr, "arg1 is width (required)\n");
+        fprintf(stderr, "arg2 is height (required)\n");
+        fprintf(stderr, "arg3 is algorithm (optional)\n");
+        fprintf(stderr, "arg4 is cell-size (optional)\n");
+        return EXIT_FAILURE;
     }
 
+    const int width = (int) strtol(args[1], NULL, 10);
+    const int height = (int) strtol(args[2], NULL, 10);
+
     if (width < 0) {
-        fprintf(stderr, "width must be greater than 0, was %d", width);
+        fprintf(stderr, "width must be greater than 0, was %d\n", width);
         return EXIT_FAILURE;
     }
     if (height < 0) {
-        fprintf(stderr, "height must be greater than 0, was %d", height);
+        fprintf(stderr, "height must be greater than 0, was %d\n", height);
         return EXIT_FAILURE;
     }
 
@@ -46,14 +45,27 @@ int main(int argc, char **args) {
         } else if (strcmp(name, "bsp") == 0) {
             algorithm = generate_BSP_maze;
         } else {
-            fprintf(stderr, "Unknown algorithm: %s", name);
+            fprintf(stderr, "Unknown algorithm: %s\n", name);
+            fprintf(
+                    stderr,
+                    "Valid algorithms are:\naldous,hunt,sidewinder,binary,bsp\n"
+            );
             return EXIT_FAILURE;
         }
     } else {
         algorithm = generate_hunt_and_kill_maze;
     }
 
-    const int cell_size = 10;
+    int cell_size;
+    if (argc >= 5) {
+        cell_size = (int) strtol(args[4], NULL, 10);
+        if (cell_size < 3) {
+            fprintf(stderr, "cell-size must be 3+\n");
+            return EXIT_FAILURE;
+        }
+    } else {
+        cell_size = 10;
+    }
 
     srand(time(NULL));
     Maze *maze = new_maze(width, height, false);
