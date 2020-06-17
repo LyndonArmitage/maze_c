@@ -6,6 +6,7 @@
 #include "generator/Aldous_Broder.h"
 #include "generator/HuntKill.h"
 #include "generator/BSP.h"
+#include "generator/example.h"
 #include "SDL_Maze_Renderer.h"
 
 int main(int argc, char **args) {
@@ -44,11 +45,13 @@ int main(int argc, char **args) {
             algorithm = generate_binary_tree_maze;
         } else if (strcmp(name, "bsp") == 0) {
             algorithm = generate_BSP_maze;
+        }else if (strcmp(name, "example") == 0) {
+            algorithm = generate_example_maze;
         } else {
             fprintf(stderr, "Unknown algorithm: %s\n", name);
             fprintf(
                     stderr,
-                    "Valid algorithms are:\naldous,hunt,sidewinder,binary,bsp\n"
+                    "Valid algorithms are:\naldous,hunt,sidewinder,binary,bsp,example\n"
             );
             return EXIT_FAILURE;
         }

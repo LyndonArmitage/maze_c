@@ -32,7 +32,6 @@ void bsp_split_vertical(BSP_Segment *source, Maze const *maze);
 void bsp_split_recursive(BSP_Segment *parent, Maze const *maze);
 
 
-
 void generate_BSP_maze(Maze const *maze) {
     // BSP = Binary Space Partition
     if (maze == NULL) {
@@ -60,6 +59,10 @@ void generate_BSP_maze(Maze const *maze) {
 
 BSP_Segment *new_bsp_segment(int start_x, int start_y, int end_x, int end_y) {
     BSP_Segment *segment = malloc(sizeof(BSP_Segment));
+    if (segment == NULL) {
+        fprintf(stderr, "Unable to allocate BSP Segment");
+        exit(EXIT_FAILURE);
+    }
     segment->start_x = start_x;
     segment->start_y = start_y;
     segment->end_x = end_x;
@@ -85,6 +88,7 @@ void delete_bsp_segment_and_children(BSP_Segment *segment) {
         segment->parent = NULL;
     }
     free(segment);
+    segment = NULL;
 }
 
 void delete_bsp_segment(BSP_Segment *segment) {
@@ -111,6 +115,7 @@ void delete_bsp_segment(BSP_Segment *segment) {
         child2->parent = NULL;
     }
     free(segment);
+    segment = NULL;
 }
 
 void bsp_split(BSP_Segment *source, Maze const *maze) {
@@ -133,9 +138,9 @@ void bsp_split(BSP_Segment *source, Maze const *maze) {
         } else if (range_y == 0) {
             // cannot split horizontally anymore
             bsp_split_vertical(source, maze);
-        } else if(range_y > range_x) {
+        } else if (range_y > range_x) {
             bsp_split_horizontal(source, maze);
-        } else if(range_x > range_y) {
+        } else if (range_x > range_y) {
             bsp_split_vertical(source, maze);
         } else {
             // randomly choose dimension to split in
@@ -206,7 +211,7 @@ void bsp_split_horizontal(BSP_Segment *source, Maze const *maze) {
 
     source->child2 = new_bsp_segment(
             source->start_x,
-            pivot_y+1,
+            pivot_y + 1,
             source->end_x,
             source->end_y
     );
@@ -270,7 +275,7 @@ void bsp_split_vertical(BSP_Segment *source, Maze const *maze) {
     source->child1->parent = source;
 
     source->child2 = new_bsp_segment(
-            pivot_x+1,
+            pivot_x + 1,
             source->start_y,
             source->end_x,
             source->end_y

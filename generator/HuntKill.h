@@ -47,6 +47,7 @@ void generate_hunt_and_kill_maze(const Maze *maze) {
         }
 
         free(possible_next);
+        possible_next = NULL;
         bool hunt_time = next == NULL;
         if (!hunt_time) {
             // random walk
@@ -80,6 +81,7 @@ void generate_hunt_and_kill_maze(const Maze *maze) {
                         }
                         if (null_count >= cells_count) {
                             free(cells);
+                            cells = NULL;
                             continue; // all neighbours are unvisited
                         }
 
@@ -95,6 +97,7 @@ void generate_hunt_and_kill_maze(const Maze *maze) {
                         current = this_cell;
                         finished = true;
                         free(cells);
+                        cells = NULL;
                         break;
                     }
                 }

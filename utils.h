@@ -101,7 +101,7 @@ Cell *random_neighbour_cell(Maze *maze, Cell *cell) {
     return neighbour;
 }
 
-Cell *random_cell(const Maze*maze) {
+Cell *random_cell(const Maze *maze) {
     if (maze == NULL) return NULL;
     Cell *cell = NULL;
     while (cell == NULL) {
@@ -129,6 +129,10 @@ typedef struct CellListEntry {
  */
 CellListEntry *new_cell_list_entry(const Cell *start) {
     CellListEntry *list = malloc(sizeof(CellListEntry));
+    if (list == NULL) {
+        fprintf(stderr, "Unable to allocate cell list entry");
+        exit(EXIT_FAILURE);
+    }
     list->cell = (Cell *) start;
     list->previous = NULL;
     list->next = NULL;
@@ -204,6 +208,7 @@ int delete_from_cell_list(CellListEntry *entry) {
     // return NULL if the whole list is gone
     if (next == NULL && previous == NULL) {
         free(entry);
+        entry = NULL;
         return LIST_DELETED;
     }
 
@@ -215,6 +220,7 @@ int delete_from_cell_list(CellListEntry *entry) {
         next->previous = previous;
     }
     free(entry);
+    entry = NULL;
 
     return ENTRY_DELETED;
 }
@@ -264,6 +270,7 @@ void delete_cell_list(CellListEntry *start) {
         CellListEntry *to_delete = current;
         current = current->next;
         free(to_delete);
+        to_delete = NULL;
     }
 }
 
@@ -303,7 +310,7 @@ Cell *pick_from_cell_list(CellListEntry const *start) {
     return current->cell;
 }
 
-Cell** cell_list_to_array(CellListEntry const *start, int *size) {
+Cell **cell_list_to_array(CellListEntry const *start, int *size) {
     int count = length_of_cell_list(start);
     Cell **array = NULL;
     if (count <= 0) {
@@ -311,6 +318,10 @@ Cell** cell_list_to_array(CellListEntry const *start, int *size) {
         return array;
     }
     array = malloc(sizeof(Cell *) * count);
+    if (array == NULL) {
+        fprintf(stderr, "Unable to allocate array for cell list");
+        exit(EXIT_FAILURE);
+    }
     CellListEntry *current = (CellListEntry *) start;
     array[0] = start->cell;
     int pos = 1;

@@ -40,6 +40,7 @@ void generate_sidewinder_maze(const Maze *maze) {
     }
     if(run_of_cells != NULL) {
         free(run_of_cells);
+        run_of_cells = NULL;
     }
 
 }

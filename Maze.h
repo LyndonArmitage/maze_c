@@ -15,24 +15,47 @@ enum Direction {
     WEST = 3
 };
 
+int rotate_clockwise(const int dir) {
+    int new_dir = dir + 1;
+    if (new_dir > WEST) new_dir = NORTH;
+    return new_dir;
+}
+
+int rotate_counter_clockwise(const int dir) {
+    int new_dir = dir - 1;
+    if (new_dir < NORTH) new_dir = WEST;
+    return new_dir;
+}
+
 typedef struct Cell {
     int x, y;
     unsigned int neighbour_count;
     struct Cell **neighbours;
-    int rgb[3];
 } Cell;
 
+/**
+ * Creates a new Cell with the given x, y coordinates
+ * @param x The x coordinate
+ * @param y The y coordinate
+ * @return A pointer to the new Cell
+ */
 Cell *new_cell(int x, int y) {
     Cell *cell = malloc(sizeof(Cell));
+    if (cell == NULL) {
+        fprintf(stderr, "Unable to create cell: %dx%d", x, y);
+        exit(EXIT_FAILURE);
+    }
     cell->x = x;
     cell->y = y;
-    cell->rgb[0] = 0;
-    cell->rgb[1] = 0;
-    cell->rgb[2] = 0;
 
     // fixed count of potential neighbours in cardinal directions only
     cell->neighbour_count = DIRECTION_COUNT;
     cell->neighbours = malloc(sizeof(Cell *) * cell->neighbour_count);
+    if (cell->neighbours == NULL) {
+        fprintf(stderr, "Unable to allocate space for neighbours on cell %dx%d", x, y);
+        free(cell);
+        exit(EXIT_FAILURE);
+    }
     for (int i = 0; i < cell->neighbour_count; i++) {
         cell->neighbours[i] = NULL;
     }
@@ -62,7 +85,13 @@ int neighbour_pos(const Cell *cell_to_search, const Cell *cell_to_find) {
     return -1;
 }
 
-void delete_cell(Cell *cell, bool remove_from_neighbours) {
+/**
+ * Deletes the cell
+ * @param cell A pointer to the cell to delete
+ * @param remove_from_neighbours Whether a pointer to the cell should be
+ * removed form it's neighbours
+ */
+void delete_cell(Cell *cell, const bool remove_from_neighbours) {
     if (remove_from_neighbours) {
         for (int i = 0; i < cell->neighbour_count; i++) {
             Cell *neighbour = cell->neighbours[i];
@@ -75,6 +104,7 @@ void delete_cell(Cell *cell, bool remove_from_neighbours) {
         }
     }
     free(cell);
+    cell = NULL;
 }
 
 /**
@@ -132,7 +162,8 @@ Cell *get_cell_adjacent(const Maze *maze, const Cell *cell, int direction) {
         case WEST:
             return cell_at(maze, x - 1, y);
         default:
-            return NULL;
+            fprintf(stderr, "Unhandled direction: %d", direction);
+            exit(EXIT_FAILURE);
     }
 }
 
@@ -143,6 +174,7 @@ Cell *get_cell_adjacent(const Maze *maze, const Cell *cell, int direction) {
  * @param cell The cell to work on
  */
 void set_all_neighbouring_cells(const Maze *maze, const Cell *cell) {
+    if (maze == NULL || cell == NULL) return;
     Cell *north = get_cell_adjacent(maze, cell, NORTH);
     Cell *east = get_cell_adjacent(maze, cell, EAST);
     Cell *south = get_cell_adjacent(maze, cell, SOUTH);
@@ -172,6 +204,10 @@ Cell **get_all_neighbouring_cells(
         return NULL;
     }
     Cell **array = malloc(sizeof(Cell *) * DIRECTION_COUNT);
+    if (array == NULL) {
+        fprintf(stderr, "Unable to allocate array");
+        exit(EXIT_FAILURE);
+    }
     array[NORTH] = get_cell_adjacent(maze, cell, NORTH);
     array[EAST] = get_cell_adjacent(maze, cell, EAST);
     array[SOUTH] = get_cell_adjacent(maze, cell, SOUTH);
@@ -182,6 +218,7 @@ Cell **get_all_neighbouring_cells(
 
 
 void unlink_all_cells(const Maze *maze) {
+    if (maze == NULL) return;
     const int width = maze->width;
     const int height = maze->height;
     for (int y = 0; y < height; y++) {
@@ -196,6 +233,7 @@ void unlink_all_cells(const Maze *maze) {
 }
 
 void link_all_adjacent_cells(const Maze *maze) {
+    if (maze == NULL) return;
     const int width = maze->width;
     const int height = maze->height;
     for (int y = 0; y < height; y++) {
@@ -207,11 +245,24 @@ void link_all_adjacent_cells(const Maze *maze) {
 }
 
 Maze *new_maze(int width, int height, bool all_linked) {
+    if (width <= 0 || height <= 0) {
+        fprintf(stderr, "Cannot create a maze with dimensions: %dx%d", width, height);
+        exit(EXIT_FAILURE);
+    }
     Maze *maze = malloc(sizeof(Maze));
+    if (maze == NULL) {
+        fprintf(stderr, "Unable to create maze");
+        exit(EXIT_FAILURE);
+    }
 
     maze->width = width;
     maze->height = height;
     maze->cells = malloc(sizeof(Cell *) * width * height);
+    if (maze->cells == NULL) {
+        fprintf(stderr, "Unable to create cells");
+        free(maze);
+        exit(EXIT_FAILURE);
+    }
     maze->cell_count = width * height;
 
     for (int y = 0; y < height; y++) {
@@ -260,7 +311,9 @@ void delete_maze(Maze *maze) {
     }
     maze->cell_count = 0;
     free(maze->cells);
+    maze->cells = NULL;
     free(maze);
+    maze = NULL;
 }
 
 void unlink_cells(const Cell *cell1, const Cell *cell2) {
