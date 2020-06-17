@@ -50,15 +50,33 @@ int render_maze_with_refresh(
     bool done = false;
     SDL_Event event;
     while (!done && SDL_WaitEvent(&event)) {
-        if (event.type == SDL_QUIT) {
-            done = true;
-        } else if (event.type == SDL_KEYUP) {
-            SDL_KeyCode code = event.key.keysym.sym;
-            if (code == SDLK_ESCAPE) {
+        switch (event.type) {
+            case SDL_QUIT:
                 done = true;
-            } else {
-                maze_generator(maze);
-                render_maze_to_sdl(renderer, maze, cell_size);
+                break;
+            case SDL_WINDOWEVENT: {
+                switch (event.window.event) {
+                    case SDL_WINDOWEVENT_MOVED:
+                    case SDL_WINDOWEVENT_MAXIMIZED:
+                    case SDL_WINDOWEVENT_RESIZED:
+                    case SDL_WINDOWEVENT_RESTORED:
+                    case SDL_WINDOWEVENT_SIZE_CHANGED:
+                        render_maze_to_sdl(renderer, maze, cell_size);
+                        break;
+                    default:
+                        break;
+                }
+            }
+                break;
+            case SDL_KEYUP: {
+                SDL_KeyCode code = event.key.keysym.sym;
+                if (code == SDLK_ESCAPE) {
+                    done = true;
+                } else {
+                    maze_generator(maze);
+                    render_maze_to_sdl(renderer, maze, cell_size);
+                }
+                break;
             }
         }
     }
