@@ -8,6 +8,7 @@
 #include "generator/BSP.h"
 #include "generator/example.h"
 #include "SDL_Maze_Renderer.h"
+#include "io.h"
 
 int main(int argc, char **args) {
 

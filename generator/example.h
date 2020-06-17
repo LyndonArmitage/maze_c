@@ -10,6 +10,8 @@ void generate_example_zig_zag_maze(const Maze *maze);
 
 void generate_example_spiral_maze(const Maze *maze);
 
+void noop_generate_maze(const Maze *maze);
+
 void generate_example_maze(const Maze *maze) {
     if (maze == NULL) {
         fprintf(stderr, "No maze given to generator\n");
@@ -97,6 +99,9 @@ void generate_example_spiral_maze(const Maze *maze) {
         dir = rotate_clockwise(dir);
         size++;
     }
+}
+
+void noop_generate_maze(const Maze *maze) {
 }
 
 #endif //MAZE_EXAMPLE_H
