@@ -334,4 +334,165 @@ Cell **cell_list_to_array(CellListEntry const *start, int *size) {
     return array;
 }
 
+/**
+ * Tree like data structure of cells, can be used as a set
+ */
+typedef struct CellTreeNode {
+    Cell *cell;
+    struct CellTreeNode *parent;
+    struct CellTreeNode **children;
+    int child_count;
+} CellTreeNode;
+
+CellTreeNode *new_cell_tree_node(Cell *cell);
+
+void delete_cell_tree(CellTreeNode *root);
+
+CellTreeNode *add_child_cell_tree_node(CellTreeNode *parent, Cell *cell);
+
+void append_cell_tree_node(CellTreeNode *parent, CellTreeNode *child);
+
+CellTreeNode *get_root_cell_tree_node(CellTreeNode *node);
+
+bool in_same_cell_tree(CellTreeNode *node1, CellTreeNode *node2);
+
+void combine_cell_trees(CellTreeNode *tree1, CellTreeNode *tree2);
+
+bool in_cell_tree(const CellTreeNode *root, const Cell *cell);
+
+CellTreeNode *new_cell_tree_node(Cell *cell) {
+    if (cell == NULL) return NULL;
+    CellTreeNode *node = malloc(sizeof(CellTreeNode));
+    if (node == NULL) {
+        fprintf(stderr, "Unable to allocated CellTreeNode");
+        exit(EXIT_FAILURE);
+    }
+    node->cell = cell;
+    node->parent = NULL;
+    node->children = NULL;
+    node->child_count = 0;
+    return node;
+}
+
+void delete_cell_tree(CellTreeNode *root) {
+    if (root == NULL) return;
+    CellTreeNode **children = root->children;
+    if (children != NULL) {
+        for (int i = 0; i < root->child_count; i++) {
+            CellTreeNode *child = children[i];
+            delete_cell_tree(child);
+        }
+        root->children = NULL;
+        root->child_count = 0;
+        free(children); // free up the child count
+    }
+
+    if (root->parent != NULL) {
+        // TODO: Improve removing reference from parent
+        // Could make a function that will rearrange and allocate the children
+        // array.
+
+        // Remove reference from parent
+        for (int i = 0; i < root->child_count; i++) {
+            CellTreeNode *child = root->children[i];
+            if (child == root) {
+                // This leaves a NULL in the parent and no change to child_count
+                root->children[i] = NULL;
+                break;
+            }
+        }
+        root->parent = NULL;
+    }
+
+    root->cell = NULL;
+    free(root);
+    root = NULL;
+}
+
+CellTreeNode *add_child_cell_tree_node(CellTreeNode *parent, Cell *cell) {
+    if (parent == NULL || cell == NULL) return NULL;
+    CellTreeNode *node = new_cell_tree_node(cell);
+    append_cell_tree_node(parent, node);
+    return node;
+}
+
+void append_cell_tree_node(CellTreeNode *parent, CellTreeNode *child) {
+    if (parent == NULL || child == NULL) return;
+    CellTreeNode *child_root = get_root_cell_tree_node(child);
+    if (in_same_cell_tree(parent, child_root)) return; // already in same tree
+
+    int count = parent->child_count + 1;
+    CellTreeNode **pointer;
+    if (parent->children == NULL) {
+        pointer = malloc(sizeof(CellTreeNode *) * count);
+    } else {
+        pointer = realloc(parent->children, sizeof(CellTreeNode *) * count);
+    }
+    if (pointer == NULL) {
+        fprintf(stderr, "Unable to grow cell tree to size %d", count);
+        exit(EXIT_FAILURE);
+    }
+
+    parent->children = pointer;
+    parent->child_count = count;
+    pointer[count - 1] = child_root;
+    child_root->parent = parent;
+
+    return;
+}
+
+CellTreeNode *get_root_cell_tree_node(CellTreeNode *node) {
+    if (node == NULL) return NULL;
+    CellTreeNode *root = node;
+    while (root->parent != NULL) {
+        root = root->parent;
+    }
+    return root;
+}
+
+bool in_same_cell_tree(CellTreeNode *node1, CellTreeNode *node2) {
+    if (node1 == NULL || node2 == NULL) return false;
+    CellTreeNode *root1 = get_root_cell_tree_node(node1);
+    CellTreeNode *root2 = get_root_cell_tree_node(node2);
+    return root1 == root2;
+}
+
+void combine_cell_trees(CellTreeNode *tree1, CellTreeNode *tree2) {
+    if (tree1 == NULL || tree2 == NULL) return;
+    CellTreeNode *root1 = get_root_cell_tree_node(tree1);
+    CellTreeNode *root2 = get_root_cell_tree_node(tree2);
+    if (in_same_cell_tree(root1, root2)) return;
+    append_cell_tree_node(root1, root2);
+}
+
+bool in_cell_tree(const CellTreeNode *root, const Cell *cell) {
+    if (root == NULL || cell == NULL) return false;
+    if (root->cell == cell) return true;
+    int count = root->child_count;
+    for (int i = 0; i < count; i++) {
+        CellTreeNode *child = root->children[i];
+        if (child != NULL) {
+            // recursive check
+            if (in_cell_tree(child, cell)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+int total_cells_in_tree(const CellTreeNode *root) {
+    if (root == NULL) return 0;
+    int child_count = root->child_count;
+    if (child_count <= 0) return 1;
+
+    int count = 1;
+    for (int i = 0; i < child_count; i++) {
+        int inc = total_cells_in_tree(root->children[i]);
+        count += inc;
+    }
+    return count;
+}
+
+
 #endif //MAZE_UTILS_H

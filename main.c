@@ -7,8 +7,8 @@
 #include "generator/HuntKill.h"
 #include "generator/BSP.h"
 #include "generator/example.h"
+#include "generator/Kruskal.h"
 #include "SDL_Maze_Renderer.h"
-#include "io.h"
 
 int main(int argc, char **args) {
 
@@ -48,11 +48,13 @@ int main(int argc, char **args) {
             algorithm = generate_BSP_maze;
         }else if (strcmp(name, "example") == 0) {
             algorithm = generate_example_maze;
+        } else if(strcmp(name, "kruskal") == 0) {
+            algorithm = generate_kruskal_maze;
         } else {
             fprintf(stderr, "Unknown algorithm: %s\n", name);
             fprintf(
                     stderr,
-                    "Valid algorithms are:\naldous,hunt,sidewinder,binary,bsp,example\n"
+                    "Valid algorithms are:\naldous,hunt,sidewinder,binary,bsp,example,kruskal\n"
             );
             return EXIT_FAILURE;
         }
